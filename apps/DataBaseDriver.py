@@ -129,6 +129,7 @@ def crear_relacion_juego_plataforma(nombre_juego, plataforma, valor):
             session.run(crear_relacion_query, nombreJuego=nombre_juego, titulo=plataforma)
 
 #verifies if node multiplayer exist
+#returns a boolean
 def existe_nodo_multiplayer():
     with driver.session() as session:
         result = session.run("MATCH (m:Multiplayer) RETURN count(m) AS count")
@@ -138,6 +139,34 @@ def existe_nodo_multiplayer():
 def crear_nodo_multiplayer():
     with driver.session() as session:
         session.write_transaction(lambda tx: tx.run("CREATE (:Multiplayer {titulo: 'multiplayer'})"))
+
+#creates relationship between game and multiplayer
+# multiplayer has to be a boolean
+def crear_relacion_juego_multiplayer(nombre_juego, multiplayer):
+    if multiplayer:
+        with driver.session() as session:
+            session.write_transaction(lambda tx: tx.run("MATCH (j:Juego {nombre: $nombreJuego}), (m:Multiplayer {titulo: 'multiplayer'}) "
+                                                       "CREATE (j)-[:MULTIPLAYER]->(m)",
+                                                       nombreJuego=nombre_juego))
+
+#verifies if node rating exists
+def existe_nodo_rating(rating):
+    with driver.session() as session:
+        result = session.run("MATCH (d:Rating {rating: $rating}) RETURN d", rating=rating)
+        return result.hasNext()
+
+#creates node rating in the data base
+def crear_nodo_rating(rating):
+    if not existe_nodo_rating(rating):
+        with driver.session() as session:
+            session.write_transaction(lambda tx: tx.run("CREATE (:Rating {rating: $rating})", rating=rating))
+
+#creates relationship between game and rating
+def crear_relacion_juego_rating(nombre_juego, rating):
+    with driver.session() as session:
+        session.write_transaction(lambda tx: tx.run("MATCH (j:Juego {nombre: $nombreJuego}), (r:Rating {rating: $rating}) "
+                                                   "CREATE (j)-[:TIENE_RATING]->(r)",
+                                                   nombreJuego=nombre_juego, rating=rating))
 
 
 with driver.session() as session:
