@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from flask import Flask,jsonify,request,render_template,redirect,url_for,session
+from apps.DataBaseDriver import *
 
 # Load environment variables from .env file
 load_dotenv()
@@ -60,6 +61,9 @@ with driver.session() as session:
     # Perform database operations
     result = session.run("MATCH (n) RETURN count(n) AS nodeCount")
     print(result.single()["nodeCount"])
+
+if __name__ == '__main__':
+    app.run()
 
 # Close the driver
 driver.close()
